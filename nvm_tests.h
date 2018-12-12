@@ -12,6 +12,8 @@
 #define TEST_VALUE_INT16    421
 #define TEST_VALUE_INT32    135227
 
+#define TEST_8BIT_MANUAL_START  13483
+
 
 
 

@@ -6,6 +6,10 @@
 #include <stdio.h>
 
 #include "nvm.h"
+#include "memory.h"
+
+//Macro to calculate the address of an AttrId
+#define ID_ADDRESS(x) (x<<2)
 
 /**
  * @brief Function to retrieve a value from memory, based on a attrib
@@ -19,8 +23,8 @@
  * @return Error code: 0 for reading success,
  *                     -1 for unrecoverable error,
  *                     positive for number of bits recovered by CRC correction
- */
- gPNvm_Result gpNvm_GetAttribute(gPNvm_AttrId attrId,
+**/
+gPNvm_Result gpNvm_GetAttribute(gPNvm_AttrId attrId,
                                 UInt8 *pLength,
                                 UInt8 *pValue)
 {
@@ -28,8 +32,10 @@
     alloc_reg_t readReg;
 
     //retrieve the allocation register
-    memRead();
+    memRead(ID_ADDRESS(attrId), ALLOC_REG_LEN, (UInt8 *)&readReg);
+    *pLength = memRead(readReg.start, readReg.length, pValue);
 
+    // checkCRC(pValue, *pLength);
 
     return 0;
     //TODO: Implement the CRC correction
@@ -44,11 +50,32 @@
  * @param[in] attrId The Id of the attribute to be saved
  * @param[in] length the length of the value to be saved (in bytes)
  * @param[out] pValue the value to be saved
- */
+ * @return Error code: Number of bytes written,
+ *                     -1 for error
+**/
 gPNvm_Result gpNvm_SetAttribute(gPNvm_AttrId attrId,
                                 UInt8 length,
                                 UInt8 *pValue)
 {
+    UInt16 start;
+    alloc_reg_t writeReg;
+
+    //retrieve the next available address
+    memRead(ALLOC_TABLE_LEN, SIZE_OF_MEM_ADDRESSING, (UInt8 *)&start);
+    writeReg.start = start;
+    writeReg.length = length;
+    writeReg.crc = 0; //TODO: calculate 1 byte CRC for alloc table reg
+
+    //update the next available address
+    start += length;
+    memWrite(ALLOC_TABLE_LEN, SIZE_OF_MEM_ADDRESSING, (UInt8 *)&start);
+
+    //Store the allocation register
+    memWrite(ID_ADDRESS(attrId), ALLOC_REG_LEN, (UInt8 *)&writeReg);
+    //Store the value
+    if (writeReg.length != memWrite(writeReg.start, writeReg.length, pValue))
+      return -1;
+
     return 0;
 }
 

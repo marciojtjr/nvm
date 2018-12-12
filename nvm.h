@@ -18,6 +18,7 @@ typedef UInt8 gPNvm_Result;
 #define ALLOC_REG_LEN   4
 #define MAX_REG_ALLOC   256
 #define ALLOC_TABLE_LEN  1024 //256 * 4
+#define SIZE_OF_MEM_ADDRESSING 2 //16 bit addressing
 
 /**
  * Local functions prototypes

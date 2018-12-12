@@ -51,14 +51,18 @@ FILE *pMemory; //< The file modeling the Flash/EEPROM
 Int8 memInit (void)
 {
     alloc_reg_t allFF[MAX_REG_ALLOC];
+    UInt16 valueStartAddress = ALLOC_TABLE_LEN + SIZE_OF_MEM_ADDRESSING;
 
     pMemory = fopen(".\\mem.bin", "wb");
-    if (!memFile)
+    if (!pMemory)
       return -1;
 
     memset((UInt8 *)allFF, 0xFF, sizeof(allFF));
 
-    fwrite(allFF, sizeof(allFF), 1, memFile);
+    fwrite(allFF, sizeof(allFF), 1, pMemory); //Fill up the allocation
+                                              //table with 0xFF
+    //Initialize the next available address.
+    fwrite((UInt16 *)&valueStartAddress,sizeof(UInt16),1,pMemory);
     fclose(pMemory);
 
     return 0;
@@ -101,7 +105,7 @@ Int8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
  */
 Int8 memWrite (UInt16 start, UInt8 length, UInt8 *buffWrite)
 {
-    pMemory = fopen(".\\mem.bin", "rb");
+    pMemory = fopen(".\\mem.bin", "ab+");
     if (!pMemory)
       return -1;
     if (fseek(pMemory, start, SEEK_SET))
