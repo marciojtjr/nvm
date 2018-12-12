@@ -3,23 +3,9 @@
  *
  */
 
-
 #include <stdio.h>
 
 #include "nvm.h"
-
-typedef unsigned char UInt8;
-typedef UInt8 gPNvm_AttrId;
-typedef UInt8 gPNvm_Result;
-
-gPNvm_Result gpNvm_GetAttribute (gPNvm_AttrId attrId,
-                                 UInt8*       pLength,
-                                 UInt8*       pValue);
-
-gPNvm_Result gpNvm_SetAttribute (gPNvm_AttrId attrId,
-                                 UInt8        length,
-                                 UInt8*       pValue);
-
 
 /**
  * @brief Function to retrieve a value from memory, based on a attrib
@@ -30,12 +16,23 @@ gPNvm_Result gpNvm_SetAttribute (gPNvm_AttrId attrId,
  * @param[in] attrId The Id of the attribute to be read
  * @param[out] pLength the length of the value retrieved (in bytes)
  * @param[out] pValue the value retrieved
+ * @return Error code: 0 for reading success,
+ *                     -1 for unrecoverable error,
+ *                     positive for number of bits recovered by CRC correction
  */
  gPNvm_Result gpNvm_GetAttribute(gPNvm_AttrId attrId,
                                 UInt8 *pLength,
                                 UInt8 *pValue)
 {
+    UInt16 start;
+    alloc_reg_t readReg;
 
+    //retrieve the allocation register
+    memRead();
+
+
+    return 0;
+    //TODO: Implement the CRC correction
 }
 
 /**
@@ -52,7 +49,7 @@ gPNvm_Result gpNvm_SetAttribute(gPNvm_AttrId attrId,
                                 UInt8 length,
                                 UInt8 *pValue)
 {
-
+    return 0;
 }
 
 /**
@@ -61,66 +58,130 @@ gPNvm_Result gpNvm_SetAttribute(gPNvm_AttrId attrId,
  * Just for unit testing...
  */
 
-
-void main(void)
+#if 0
+UInt8 main(void)
 {
     FILE *pMemory; //< This is the Flash/EEPROM model
-    gPNvm_Result written = 0;
-    gPNvm_Result read = 0;
-    //Open the file for binary access, crete if doesn't exists
+    gPNvm_Result gpNvm_err = 0;
+    void *pRead_len;
+    void *pRead_val;
+    //Open the file for binary access, create if doesn't exists
     pMemory = fopen(".\\mem.bin","ab+");
+    UInt8 contErr = 0;
+
+    UInt8 run_tests = UINT8_TEST \
+                    | UINT16_TEST \
+                    | UINT32_TEST \
+                    | UINT16_ARRAY_TEST \
+                    | STRING_TEST \
+                    | SIMPLESTRUCT_TEST \
+                    | COMPLEXSTRUCT_TEST;
+
+    printf("uint8: %d bytes\nuint16: %d bytes\nuint32: %d bytes\n",
+            sizeof(UInt8), sizeof(UInt16), sizeof(UInt32));
+
+    printf("Tests: %x\n\n", run_tests);
+    printf("UInt8 test: %d\n", (run_tests & UINT8_TEST));
+    printf("UInt16 test: %d\n", (run_tests & UINT16_TEST));
+
+
 
     /**** int 8 test **/
-    UInt8 TestInt8 = TEST_VALUE_INT8;
-    UInt8 *pTestInt8 = &TestInt8;
-    UInt8 *pRead_len;
-    UInt8 *pRead_val;
+    if (run_tests & UINT8_TEST)
+    {
+        UInt8 TestInt8 = TEST_VALUE_INT8;
+        UInt8 *pTestInt8 = &TestInt8;
 
-    written = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), (UInt8 *)pTestInt8);
-    if (written == sizeof(UInt8))
-    {
-        printf("Test UInt8 write OK.\n");
-    }
-    read = gpNvm_GetAttribute(TEST_8BIT_ID, pRead_len, pRead_val);
-    if (read == sizeof(UInt8))
-    {
-        printf("Test UInt8 read OK.\n");
-        if (*pRead_val == TEST_VALUE_INT8)
+        gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), (UInt8 *)pTestInt8);
+        if (!gpNvm_err)
         {
-            printf("Test UInt8 read value OK.\n");
+            printf("Test UInt8 write OK.\n");
         }
+        else
+            contErr++;
+        gpNvm_err = gpNvm_GetAttribute(TEST_8BIT_ID, (UInt8 *)pRead_len, (UInt8 *)pRead_val);
+        if (!gpNvm_err)
+        {
+            printf("Test UInt8 read OK.\n");
+            pRead_val = pTestInt8;
+            if (*(UInt8 *)pRead_val == TEST_VALUE_INT8)
+            {
+                printf("Test UInt8 read value OK.\n");
+            }
+            else
+                contErr++;
+        }
+        else
+            contErr++;
     }
-
     /**** int 16 test **/
-    UInt16 TestInt16 = TEST_VALUE_INT16;
-    UInt16 *pTestInt16 = &TestInt16;
-    UInt16 *pRead_len;
-    UInt16 *pRead_val;
+    if (run_tests & UINT16_TEST)
+    {
+        UInt16 TestInt16 = TEST_VALUE_INT16;
+        UInt16 *pTestInt16 = &TestInt16;
 
-    written = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), (UInt8 *)pTestInt8);
-    if (written == sizeof(UInt8))
-    {
-        printf("Test UInt8 write OK.\n");
-    }
-    read = gpNvm_GetAttribute(TEST_8BIT_ID, pRead_len, pRead_val);
-    if (read == sizeof(UInt8))
-    {
-        printf("Test UInt8 read OK.\n");
-        if (*pRead_val == TEST_VALUE_INT8)
+        gpNvm_err = gpNvm_SetAttribute(TEST_16BIT_ID, sizeof(UInt16), (UInt8 *)pTestInt16);
+        if (!gpNvm_err)
         {
-            printf("Test UInt8 read value OK.\n");
+            printf("Test UInt16 write OK.\n");
         }
+        else
+            contErr++;
+        gpNvm_err = gpNvm_GetAttribute(TEST_16BIT_ID, (UInt8 *)pRead_len, (UInt8 *)pRead_val);
+        if (!gpNvm_err)
+        {
+            printf("Test UInt16 read OK.\n");
+            pRead_val = pTestInt16;
+            if (*(UInt16 *)pRead_val == TEST_VALUE_INT16)
+            {
+                printf("Test UInt16 read value OK.\n");
+            }
+            else
+                contErr++;
+        }
+        else
+            contErr++;
     }
 
     /**** int 32 test **/
+    if (run_tests & UINT32_TEST)
+    {
+        UInt32 TestInt32 = TEST_VALUE_INT32;
+        UInt32 *pTestInt32 = &TestInt32;
+
+        gpNvm_err = gpNvm_SetAttribute(TEST_32BIT_ID, sizeof(UInt16), (UInt8 *)pTestInt32);
+        if (!gpNvm_err)
+        {
+            printf("Test UInt32 write OK.\n");
+        }
+        else
+            contErr++;
+        gpNvm_err = gpNvm_GetAttribute(TEST_32BIT_ID, (UInt8 *)pRead_len, (UInt8 *)pRead_val);
+        if (!gpNvm_err)
+        {
+            printf("Test UInt32 read OK.\n");
+            pRead_val = pTestInt32;
+            if (*(UInt32 *)pRead_val == TEST_VALUE_INT32)
+            {
+                printf("Test UInt32 read value OK.\n");
+            }
+            else
+                contErr++;
+        }
+        else
+            contErr++;
+    }
+
     /**** float test **/
     /**** int 16 array test **/
     /**** string test **/
     /**** simple struct test **/
     /**** complex struct test **/
 
-
-
-
-    return 0;
+    printf("result: %d\n", contErr);
+    printf("FIM\n");
+    getchar();
+    fclose(pMemory);
+    return contErr;
 }
+#endif
