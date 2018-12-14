@@ -20,8 +20,7 @@
  * @param[in] attrId The Id of the attribute to be read
  * @param[out] pLength the length of the value retrieved (in bytes)
  * @param[out] pValue the value retrieved
- * @return Error code: 0 for reading success,
- *                     -1 for unrecoverable error,
+ * @return Error code: 0xFF for unrecoverable error,
  *                     positive for number of bits recovered by CRC correction
 **/
 gPNvm_Result gpNvm_GetAttribute(gPNvm_AttrId attrId,
@@ -48,33 +47,40 @@ gPNvm_Result gpNvm_GetAttribute(gPNvm_AttrId attrId,
  *  It returns the Value stored
  *
  * @param[in] attrId The Id of the attribute to be saved
- * @param[in] length the length of the value to be saved (in bytes)
- * @param[out] pValue the value to be saved
- * @return Error code: Number of bytes written,
- *                     -1 for error
+ * @param[in] length The length of the value to be saved, in bytes.
+ *                   0xFF not allowed (reserved).
+ * @param[in] pValue Pointer to the value to be saved
+ * @return Number of bytes written, 0xFF for error.
+ *
 **/
 gPNvm_Result gpNvm_SetAttribute(gPNvm_AttrId attrId,
                                 UInt8 length,
                                 UInt8 *pValue)
 {
     UInt16 start;
-    alloc_reg_t writeReg;
+    alloc_reg_t aReg;
+
+    //retrieve the allocation register to check the length
+    memRead(ID_ADDRESS(attrId), ALLOC_REG_LEN, (UInt8 *)&aReg);
+    if (aReg.length != length)
+        return 0xFF; // In this allocation scheme, the memory won't
+                     // accept writing the same AttrId with different length
 
     //retrieve the next available address
     memRead(ALLOC_TABLE_LEN, SIZE_OF_MEM_ADDRESSING, (UInt8 *)&start);
-    writeReg.start = start;
-    writeReg.length = length;
-    writeReg.crc = 0; //TODO: calculate 1 byte CRC for alloc table reg
+    aReg.start = start;
+    aReg.length = length;
+    aReg.crc = 0; //TODO: calculate 1 byte CRC for alloc table reg
 
     //update the next available address
     start += length;
     memWrite(ALLOC_TABLE_LEN, SIZE_OF_MEM_ADDRESSING, (UInt8 *)&start);
 
     //Store the allocation register
-    memWrite(ID_ADDRESS(attrId), ALLOC_REG_LEN, (UInt8 *)&writeReg);
+    memWrite(ID_ADDRESS(attrId), ALLOC_REG_LEN, (UInt8 *)&aReg);
     //Store the value
-    if (writeReg.length != memWrite(writeReg.start, writeReg.length, pValue))
-      return -1;
+    if (aReg.length != memWrite(aReg.start, aReg.length, pValue))
+      return 0xFF;
 
     return 0;
 }

@@ -11,6 +11,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "memory.h"
 #include "nvm.h"
@@ -21,7 +22,7 @@
  * Exported module variables
  **********************************
 */
-volatile
+//volatile
 
 
 /**********************************
@@ -83,12 +84,15 @@ Int8 memInit (void)
  */
 Int8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
 {
+    Int8 ret = -1;
     pMemory = fopen(".\\mem.bin", "rb");
     if (!pMemory)
-      return -1;
+      return ret;
     if (fseek(pMemory, start, SEEK_SET))
-      return -1;
-    return (fread(buffRead, length, 1, pMemory));
+      return ret;
+    ret = fread(buffRead, length, 1, pMemory);
+    fclose(pMemory);
+    return ret;
 } //memRead (
 
 /**
@@ -105,10 +109,13 @@ Int8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
  */
 Int8 memWrite (UInt16 start, UInt8 length, UInt8 *buffWrite)
 {
-    pMemory = fopen(".\\mem.bin", "ab+");
+    Int8 ret = -1;
+    pMemory = fopen(".\\mem.bin", "rb+");
     if (!pMemory)
-      return -1;
+      return ret;
     if (fseek(pMemory, start, SEEK_SET))
-      return -1;
-    return (fwrite(buffWrite, length, 1, pMemory));
+      return ret;
+    ret = fwrite(buffWrite, length, 1, pMemory);
+    fclose(pMemory);
+    return ret;
 } //memWrite (

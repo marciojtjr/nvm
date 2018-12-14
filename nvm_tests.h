@@ -10,9 +10,9 @@
 
 #define TEST_VALUE_INT8     149
 #define TEST_VALUE_INT16    421
-#define TEST_VALUE_INT32    135227
+#define TEST_VALUE_INT32    135227L
 
-#define TEST_8BIT_MANUAL_START  13483
+#define TEST_8BIT_MANUAL_START  13483L
 
 
 
@@ -33,5 +33,13 @@
 #define STRING_TEST                 0x10
 #define SIMPLESTRUCT_TEST           0x20
 #define COMPLEXSTRUCT_TEST          0x40
+
+
+//Testing functions
+void test_will_always_pass(void);
+void test_manual_initialize_memory(void);
+void test_restore_uint8(void);
+void test_backup_uint8(void);
+
 
 #endif

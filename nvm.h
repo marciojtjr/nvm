@@ -15,10 +15,16 @@ typedef unsigned int UInt32;
 typedef UInt8 gPNvm_AttrId;
 typedef UInt8 gPNvm_Result;
 
-#define ALLOC_REG_LEN   4
-#define MAX_REG_ALLOC   256
-#define ALLOC_TABLE_LEN  1024 //256 * 4
-#define SIZE_OF_MEM_ADDRESSING 2 //16 bit addressing
+#define ALLOC_REG_LEN   4   //< Length of each allocation register, in bytes
+#define MAX_REG_ALLOC   256 //< Max ammount of allocation registers
+#define ALLOC_TABLE_LEN  1024 //< Length of the allocation table (256 * 4)
+#define SIZE_OF_MEM_ADDRESSING 2 // Length of memory addressing, in bytes
+#define NEXT_FREE_ADDR ALLOC_TABLE_LEN //Pointer to the next available address
+#define MEM_VALUES_START (ALLOC_TABLE_LEN \
+                        + SIZE_OF_MEM_ADDRESSING) //< Beggining of
+                                                  //value storing area
+#define MEM_VALUES_LEN   ((1<<16) - MEM_VALUES_START) //< Length of memory
+                         // available to store values (64510 bytes)
 
 /**
  * Local functions prototypes
