@@ -253,47 +253,35 @@ void test_backup_read_array_uint8(void)
 
 } // test_backup_read_array_uint8(
 
-
 /**
  * @brief Function to test the writing and reading of a simple struc
  *
  * This function's goal is to test how the memory deals with data in a struct.
+ * The testing struct is very simple, in order to make it easy to debug whether
+ * there is any error on dealing with structs.
  * Like the latest functions, it relies on the memory access low level functions.
  * Therefore, it will call the GetAttribute and SetAttribute for reading and
  * writing the values.
  */
-void test_backup_read_complex_struct(void)
+void test_backup_read_simple_struct(void)
 {
-    gpTestData_t testWriteStruct, testReadStruct, *ptestWriteStruct;
+    gpSimpleData_t testWriteStruct, testReadStruct, *pTestWriteStruct;
     UInt8 readLen;
-    UInt8 testValue, i;
 
-    ptestWriteStruct = &testWriteStruct;
-    pReadVal = (gpTestData_t *)&testReadStruct;
+    pTestWriteStruct = &testWriteStruct;
+    pReadVal = (gpSimpleData_t *)&testReadStruct;
     pReadLen = &readLen;
 
     //Fill the structure with testing values
-    testWriteStruct.id = TEST_STRUCT_ID_VALUE;
-    testWriteStruct.options = TEST_STRUCT_OPT_VALUE;
-    testWriteStruct.length = TEST_STRUCT_LEN_VALUE;
+    testWriteStruct.id = TEST_VALUE_STRUCT_ID;
+    testWriteStruct.value16 = TEST_VALUE_INT16;
+    testWriteStruct.value32 = TEST_VALUE_INT32;
     // Generate pseudo random number to initialize the array.
-    testValue = (UInt8) (rand() % (sizeof(UInt8) - MAX_STRUCT_DATA_LENGTH));
-    //Fill the testing array to be saved
-    for (i = 0; i < testWriteStruct.length; ++i)
-    {
-        //Fill up using a simple sequence of <length> size randomly started.
-        testWriteStruct.data[i] = testValue + i;
-    }
-    for ( ; i < MAX_STRUCT_DATA_LENGTH; ++i)
-    {
-        //Pad with 0xFF til the end of the array.
-        testWriteStruct.data[i] = 0xFF;
-    }
 
-    //Write the testing value
+    //Write the testing struct with values
     gpNvm_err = gpNvm_SetAttribute(TEST_SIMPLESTRUCT_ID, \
                                    sizeof(testWriteStruct), \
-                                   (UInt8 *)ptestWriteStruct);
+                                   (UInt8 *)pTestWriteStruct);
     TEST_ASSERT_FALSE(gpNvm_err);
     //Then read it.
     gpNvm_err = gpNvm_GetAttribute(TEST_SIMPLESTRUCT_ID, \
@@ -303,15 +291,74 @@ void test_backup_read_complex_struct(void)
     TEST_ASSERT_EQUAL(sizeof(testWriteStruct), *(UInt8 *)pReadLen);
 
     //Test the struct values
-    TEST_ASSERT_EQUAL_UINT((*ptestWriteStruct).id, \
+    TEST_ASSERT_EQUAL_UINT((*pTestWriteStruct).id, \
+                           (*(gpSimpleData_t *)pReadVal).id);
+    TEST_ASSERT_EQUAL_UINT16((*pTestWriteStruct).value16, \
+                           (*(gpSimpleData_t *)pReadVal).value16);
+    TEST_ASSERT_EQUAL_UINT32((*pTestWriteStruct).value32, \
+                             (*(gpSimpleData_t *)pReadVal).value32);
+
+} // test_backup_read_simple_struct
+
+/**
+ * @brief Function to test the writing and reading of a complex struc
+ *
+ * This function's goal is to test how the memory deals with data in a more
+ * complex structure having more members, one being an array.
+ * Like the latest functions, it relies on the memory access low level functions.
+ * Therefore, it will call the GetAttribute and SetAttribute for reading and
+ * writing the values.
+ */
+void test_backup_read_complex_struct(void)
+{
+    gpTestData_t testWriteStruct, testReadStruct, *pTestWriteStruct;
+    UInt8 readLen;
+    UInt8 testValue, i;
+
+    pTestWriteStruct = &testWriteStruct;
+    pReadVal = (gpTestData_t *)&testReadStruct;
+    pReadLen = &readLen;
+
+    //Fill the structure with testing values
+    testWriteStruct.id = TEST_VALUE_STRUCT_ID;
+    testWriteStruct.options = TEST_VALUE_STRUCT_OPT;
+    testWriteStruct.length = TEST_VALUE_STRUCT_LEN;
+    // Generate pseudo random number to initialize the array.
+    testValue = (UInt8) (rand() % (sizeof(UInt8) - MAX_STRUCT_DATA_LENGTH));
+    //Fill the testing array to be saved
+    for (i = 0; i < testWriteStruct.length; ++i)
+    {
+        //Fill up using a simple sequence of <length> size randomly init.
+        testWriteStruct.data[i] = testValue + i;
+    }
+    for ( ; i < MAX_STRUCT_DATA_LENGTH; ++i)
+    {
+        //Pad with 0xFF til the end of the array.
+        testWriteStruct.data[i] = 0xFF;
+    }
+
+    //Write the testing struct with values
+    gpNvm_err = gpNvm_SetAttribute(TEST_COMPLEXSTRUCT_ID, \
+                                   sizeof(testWriteStruct), \
+                                   (UInt8 *)pTestWriteStruct);
+    TEST_ASSERT_FALSE(gpNvm_err);
+    //Then read it.
+    gpNvm_err = gpNvm_GetAttribute(TEST_COMPLEXSTRUCT_ID, \
+                                  (UInt8 *)pReadLen, \
+                                  (UInt8 *)pReadVal);
+    TEST_ASSERT_FALSE(gpNvm_err);
+    TEST_ASSERT_EQUAL(sizeof(testWriteStruct), *(UInt8 *)pReadLen);
+
+    //Test the struct values
+    TEST_ASSERT_EQUAL_UINT((*pTestWriteStruct).id, \
                            (*(gpTestData_t *)pReadVal).id);
-    TEST_ASSERT_EQUAL_UINT((*ptestWriteStruct).length,
+    TEST_ASSERT_EQUAL_UINT((*pTestWriteStruct).length,
                            (*(gpTestData_t *)pReadVal).length);
-    TEST_ASSERT_EQUAL_UINT32((*ptestWriteStruct).options, \
+    TEST_ASSERT_EQUAL_UINT32((*pTestWriteStruct).options, \
                              (*(gpTestData_t *)pReadVal).options);
     //Test array positions 1 and 7
-    TEST_ASSERT_EQUAL_UINT((*ptestWriteStruct).data[1], \
+    TEST_ASSERT_EQUAL_UINT((*pTestWriteStruct).data[1], \
                            (*(gpTestData_t *)pReadVal).data[1]);
-    TEST_ASSERT_EQUAL_UINT((*ptestWriteStruct).data[7], \
+    TEST_ASSERT_EQUAL_UINT((*pTestWriteStruct).data[7], \
                            (*(gpTestData_t *)pReadVal).data[7]);
 } // test_backup_read_complex_struct(

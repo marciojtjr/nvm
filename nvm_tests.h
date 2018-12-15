@@ -11,9 +11,9 @@
 #define TEST_VALUE_INT8         149
 #define TEST_VALUE_INT16        421
 #define TEST_VALUE_INT32        135227L
-#define TEST_STRUCT_ID_VALUE    98
-#define TEST_STRUCT_OPT_VALUE   0xF50014
-#define TEST_STRUCT_LEN_VALUE   13
+#define TEST_VALUE_STRUCT_ID    98
+#define TEST_VALUE_STRUCT_OPT   0xF50014
+#define TEST_VALUE_STRUCT_LEN   13
 
 #define TEST_8BIT_MANUAL_START  13483L
 
@@ -74,6 +74,7 @@ void test_restore_uint8(void);
 void test_backup_uint8(void);
 void test_backup_read_uint32(void);
 void test_backup_read_array_uint8(void);
+void test_backup_read_simple_struct(void);
 void test_backup_read_complex_struct(void);
 
 #endif

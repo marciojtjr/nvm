@@ -22,5 +22,6 @@ int main()
     RUN_TEST(test_backup_read_uint32);
     RUN_TEST(test_backup_read_array_uint8);
     RUN_TEST(test_backup_read_complex_struct);
+    RUN_TEST(test_backup_read_simple_struct);
     return UNITY_END();
 }
