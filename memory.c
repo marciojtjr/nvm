@@ -43,27 +43,36 @@ FILE *pMemory; //< The file modeling the Flash/EEPROM
  *
  * This function initializes the memory, making it ready
  * to be used. This procedure erase all the data on it.
- * Actually, this version creates a new empty file all fill
+ * Actually, this version creates a new empty file, then fill
  * the allocation table area with 0xFF, meaning the memory
- * holds no data.
+ * holds no data. It also sets the next available address to
+ * the beggining of the values area of the memory and sets this area
+ * to 0xFF.
  *
- * @return Error code: 0 for success, -1 for error
+ * @return Error status: 0 for success, 0xFF for error
  */
-Int8 memInit (void)
+UInt8 memInit (void)
 {
     alloc_reg_t allFF[MAX_REG_ALLOC];
     UInt16 valueStartAddress = ALLOC_TABLE_LEN + SIZE_OF_MEM_ADDRESSING;
+    UInt8 memValuesFF[MEM_VALUES_LEN];
 
-    pMemory = fopen(".\\mem.bin", "wb");
+    pMemory = fopen(".\\mem.bin", "wb"); //Create new, empty file
     if (!pMemory)
       return -1;
 
     memset((UInt8 *)allFF, 0xFF, sizeof(allFF));
 
-    fwrite(allFF, sizeof(allFF), 1, pMemory); //Fill up the allocation
-                                              //table with 0xFF
+    //Fill up the allocation table with 0xFF
+    fwrite(allFF, 1, sizeof(allFF), pMemory);
+
     //Initialize the next available address.
-    fwrite((UInt16 *)&valueStartAddress,sizeof(UInt16),1,pMemory);
+    fwrite((UInt16 *)&valueStartAddress, 1, sizeof(UInt16), pMemory);
+
+    //Fill up the values area with 0xFF
+    memset((UInt8 *)memValuesFF, 0xFF, sizeof(memValuesFF));
+    fwrite(memValuesFF, 1, sizeof(memValuesFF), pMemory);
+
     fclose(pMemory);
 
     return 0;
@@ -80,9 +89,9 @@ Int8 memInit (void)
  * @param[in] length Number of bytes to be read
  * @param[out] *buffRead Pointer to the buffer that will receive the data
  * @return Error code: Number of bytes read
- *                     -1 for unrecoverable error
+ *                     0xFF for unrecoverable error
  */
-Int8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
+UInt8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
 {
     Int8 ret = -1;
     pMemory = fopen(".\\mem.bin", "rb");
@@ -90,7 +99,7 @@ Int8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
       return ret;
     if (fseek(pMemory, start, SEEK_SET))
       return ret;
-    ret = fread(buffRead, length, 1, pMemory);
+    ret = fread(buffRead, 1, length, pMemory);
     fclose(pMemory);
     return ret;
 } //memRead (
@@ -107,15 +116,16 @@ Int8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
  * @return Error code: 0 for writing success
  *                     -1 for writting error
  */
-Int8 memWrite (UInt16 start, UInt8 length, UInt8 *buffWrite)
+UInt8 memWrite (UInt16 start, UInt8 length, UInt8 *buffWrite)
 {
-    Int8 ret = -1;
+    UInt8 ret = -1;
+
     pMemory = fopen(".\\mem.bin", "rb+");
     if (!pMemory)
       return ret;
     if (fseek(pMemory, start, SEEK_SET))
       return ret;
-    ret = fwrite(buffWrite, length, 1, pMemory);
+    ret = fwrite(buffWrite, 1, length, pMemory);
     fclose(pMemory);
     return ret;
 } //memWrite (

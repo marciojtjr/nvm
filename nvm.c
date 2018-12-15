@@ -62,12 +62,12 @@ gPNvm_Result gpNvm_SetAttribute(gPNvm_AttrId attrId,
 
     //retrieve the allocation register to check the length
     memRead(ID_ADDRESS(attrId), ALLOC_REG_LEN, (UInt8 *)&aReg);
-    if (aReg.length != length)
+    if ((aReg.length != 0xFF) && (aReg.length != length))
         return 0xFF; // In this allocation scheme, the memory won't
                      // accept writing the same AttrId with different length
 
     //retrieve the next available address
-    memRead(ALLOC_TABLE_LEN, SIZE_OF_MEM_ADDRESSING, (UInt8 *)&start);
+    memRead(NEXT_FREE_ADDR, SIZE_OF_MEM_ADDRESSING, (UInt8 *)&start);
     aReg.start = start;
     aReg.length = length;
     aReg.crc = 0; //TODO: calculate 1 byte CRC for alloc table reg
