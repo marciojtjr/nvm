@@ -176,7 +176,8 @@ void test_backup_uint8(void)
     fread(pValueAdd, 1, SIZE_OF_MEM_ADDRESSING, pTestMemory);
 
     //Write the testing value
-    gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), (UInt8 *)pTestInt8);
+    gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), \
+                                   (UInt8 *)pTestInt8);
     TEST_ASSERT_FALSE(gpNvm_err);
 
     //Then read it, manually
@@ -204,10 +205,14 @@ void test_backup_read_uint32(void)
     pReadVal = &readValue;
     pReadLen = &readLen;
     //Write the testing value
-    gpNvm_err = gpNvm_SetAttribute(TEST_32BIT_ID, sizeof(UInt32), (UInt8 *)pTestInt32);
+    gpNvm_err = gpNvm_SetAttribute(TEST_32BIT_ID, \
+                                   sizeof(UInt32), \
+                                   (UInt8 *)pTestInt32);
     TEST_ASSERT_FALSE(gpNvm_err);
     //Then read it.
-    gpNvm_err = gpNvm_GetAttribute(TEST_32BIT_ID, (UInt8 *)pReadLen, (UInt8 *)pReadVal);
+    gpNvm_err = gpNvm_GetAttribute(TEST_32BIT_ID, \
+                                   (UInt8 *)pReadLen, \
+                                   (UInt8 *)pReadVal);
     TEST_ASSERT_FALSE(gpNvm_err);
     TEST_ASSERT_EQUAL(sizeof(UInt32), *(UInt8 *)pReadLen);
     TEST_ASSERT_EQUAL_UINT32(TEST_VALUE_INT32, *(UInt32 *)pReadVal);
@@ -240,10 +245,14 @@ void test_backup_read_array_uint8(void)
     }
 
     //Write the testing value
-    gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ARRAY_ID, sizeof(testArrayUint8), (UInt8 *)testArrayUint8);
+    gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ARRAY_ID, \
+                                   sizeof(testArrayUint8), \
+                                   (UInt8 *)testArrayUint8);
     TEST_ASSERT_FALSE(gpNvm_err);
     //Then read it.
-    gpNvm_err = gpNvm_GetAttribute(TEST_8BIT_ARRAY_ID, (UInt8 *)pReadLen, (UInt8 *)pReadVal);
+    gpNvm_err = gpNvm_GetAttribute(TEST_8BIT_ARRAY_ID, \
+                                   (UInt8 *)pReadLen, \
+                                   (UInt8 *)pReadVal);
     TEST_ASSERT_FALSE(gpNvm_err);
     TEST_ASSERT_EQUAL(sizeof(testArrayUint8), *(UInt8 *)pReadLen);
     //Test the first element
@@ -254,12 +263,13 @@ void test_backup_read_array_uint8(void)
 } // test_backup_read_array_uint8(
 
 /**
- * @brief Function to test the writing and reading of a simple struc
+ * @brief Function to test the writing and reading of a simple struct
  *
  * This function's goal is to test how the memory deals with data in a struct.
  * The testing struct is very simple, in order to make it easy to debug whether
  * there is any error on dealing with structs.
- * Like the latest functions, it relies on the memory access low level functions.
+ * Like the latest functions, it relies on the memory access low level
+ * functions.
  * Therefore, it will call the GetAttribute and SetAttribute for reading and
  * writing the values.
  */
@@ -301,11 +311,12 @@ void test_backup_read_simple_struct(void)
 } // test_backup_read_simple_struct
 
 /**
- * @brief Function to test the writing and reading of a complex struc
+ * @brief Function to test the writing and reading of a complex struct
  *
  * This function's goal is to test how the memory deals with data in a more
  * complex structure having more members, one being an array.
- * Like the latest functions, it relies on the memory access low level functions.
+ * Like the latest functions, it relies on the memory access low level
+ * functions.
  * Therefore, it will call the GetAttribute and SetAttribute for reading and
  * writing the values.
  */
