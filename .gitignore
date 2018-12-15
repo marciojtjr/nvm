@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+id-2_rsa
+id-2_rsa.pub
+id-marciojr_rsa
+id-marciojr_rsa.pub
