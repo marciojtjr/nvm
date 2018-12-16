@@ -6,7 +6,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": " gcc -g .\\main.c .\\nvm.c .\\memory.c  .\\nvm_tests.c ..\\Unity\\src\\unity.c -o test",
+            "command": " gcc -g .\\main.c .\\nvm.c .\\memory.c .\\utils.c .\\nvm_tests.c ..\\Unity\\src\\unity.c -o test",
             "problemMatcher": [
                 "$gcc"
             ]

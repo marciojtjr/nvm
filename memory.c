@@ -5,8 +5,11 @@
  *
  * This is the implementation of the file access modeling the
  * physical memory. If this was to be changed to a real device,
- * we only need to provide this same functions able to read from
- * and write to the real memmory
+ * one only need to provide this same functions able to read from
+ * and write to the real memmory device.
+ *
+ * @author Marcio J Teixeira Jr.
+ * @date 09/12/18
  *
  */
 
@@ -15,7 +18,6 @@
 
 #include "memory.h"
 #include "nvm.h"
-
 
 
 /**********************************
@@ -29,7 +31,7 @@
  * Local module variables
  **********************************
 */
-FILE *pMemory; //< The file modeling the Flash/EEPROM
+FILE *pMemory; ///< The file modeling the Flash/EEPROM
 
 /**********************************
  * Exported module variables
@@ -54,12 +56,12 @@ FILE *pMemory; //< The file modeling the Flash/EEPROM
 UInt8 memInit (void)
 {
     alloc_reg_t allFF[MAX_REG_ALLOC];
-    UInt16 valueStartAddress = ALLOC_TABLE_LEN + SIZE_OF_MEM_ADDRESSING;
+    UInt16 valueStartAddress = ALLOC_TABLE_LEN + SIZE_MEM_ADDRESS;
     UInt8 memValuesFF[MEM_VALUES_LEN];
 
     pMemory = fopen(".\\mem.bin", "wb"); //Create new, empty file
     if (!pMemory)
-      return -1;
+      return 0xFF;
 
     memset((UInt8 *)allFF, 0xFF, sizeof(allFF));
 
@@ -93,7 +95,7 @@ UInt8 memInit (void)
  */
 UInt8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
 {
-    Int8 ret = -1;
+    Int8 ret = 0xFF;
     pMemory = fopen(".\\mem.bin", "rb");
     if (!pMemory)
       return ret;
@@ -110,15 +112,15 @@ UInt8 memRead (UInt16 start, UInt8 length, UInt8 *buffRead)
  * This function writes bytes to memory. Actually
  * it writes to a file that is modeling a physical memory.
  *
- * @param[in] start The start address for writting
+ * @param[in] start The start address for writing
  * @param[in] length The length of data to be written
  * @param[out] *buffWrite Pointer to the buffer containing data to be written
  * @return Error code: 0 for writing success
- *                     -1 for writting error
+ *                     0xFF for writing error
  */
 UInt8 memWrite (UInt16 start, UInt8 length, UInt8 *buffWrite)
 {
-    UInt8 ret = -1;
+    UInt8 ret = 0xFF;
 
     pMemory = fopen(".\\mem.bin", "rb+");
     if (!pMemory)

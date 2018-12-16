@@ -1,3 +1,16 @@
+/**
+ * @file nvm_tests.c
+ * @brief Unit tests file, based on the UNITY unit test harness
+ *
+ * This file contains all the individual unit tests functions.
+ * The control of the tests is done on the main.c file.
+ *
+ * @author Marcio J Teixeira Jr.
+ * @date 09/12/18
+ *
+ */
+
+
 #include "nvm.h"
 #include "memory.h"
 #include "nvm_tests.h"
@@ -18,10 +31,10 @@
                              //take advantage of bit shifting
 
 
-FILE *pTestMemory; //< The testing file
-gPNvm_Result gpNvm_err = 0;
-void *pReadLen;
-void *pReadVal;
+FILE *pTestMemory; ///< The testing file
+gPNvm_Result gpNvm_err = 0; ///< Variable to receive the result of Get and Set
+void *pReadLen; ///< Pointer to receive the length from the Get function
+void *pReadVal; ///< Pointer to receive the value from the Get function
 
 /**
  * @brief Unity setUp function
@@ -119,6 +132,7 @@ void test_restore_uint8(void)
     size_t resFseek, resFwrite;
     UInt8 valTestUInt8;
     UInt8 readValue, readLen;
+    UInt16 dataCRC;
 
     pReadVal = &readValue;
     pReadLen = &readLen;
@@ -127,7 +141,7 @@ void test_restore_uint8(void)
 
     manualAllocReg.start = TEST_8BIT_MANUAL_START;
     manualAllocReg.length = 1;
-    manualAllocReg.crc = 0; //TODO: Calc CRC
+    manualAllocReg.crc = calcCRC8((UInt8 *)&manualAllocReg, ALLOC_REG_NO_CRC);
 
     resFseek = fseek(pTestMemory, ID_ADDRESS(TEST_8BIT_ID), SEEK_SET);
     TEST_ASSERT_EQUAL(0, resFseek);
@@ -137,10 +151,14 @@ void test_restore_uint8(void)
                                                      pTestMemory);
     TEST_ASSERT_EQUAL(sizeof(manualAllocReg), resFwrite);
 
+    //Position the file for writing the data manually
     resFseek = fseek(pTestMemory, TEST_8BIT_MANUAL_START, SEEK_SET);
     TEST_ASSERT_EQUAL(0, resFseek);
     resFwrite = fwrite(&valTestUInt8, 1, sizeof(UInt8), pTestMemory);
     TEST_ASSERT_EQUAL(sizeof(UInt8), resFwrite);
+    dataCRC = calcCRC16((UInt8 *)&valTestUInt8, sizeof(valTestUInt8));
+    //The file is at correct position, just need to write the CRC
+    fwrite ((UInt8 *)&dataCRC, 1, CRC_LEN, pTestMemory);
     fclose(pTestMemory);
 
     //Now perform the reading
@@ -173,7 +191,7 @@ void test_backup_uint8(void)
 
     //Check what should be the address to save the data.
     fseek(pTestMemory, NEXT_FREE_ADDR, SEEK_SET);
-    fread(pValueAdd, 1, SIZE_OF_MEM_ADDRESSING, pTestMemory);
+    fread(pValueAdd, 1, SIZE_MEM_ADDRESS, pTestMemory);
 
     //Write the testing value
     gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), \

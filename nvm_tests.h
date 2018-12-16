@@ -1,5 +1,12 @@
 /**
  * @file nvm_tests.h
+ * @brief Header file of Unit tests module
+ *
+ * This file contains all the @e defines of testing values, testing addresses,
+ * testing data structures and the prototype of the unit test functions.
+ *
+ * @author Marcio J Teixeira Jr.
+ * @date 09/12/18
  *
  */
 
@@ -39,9 +46,9 @@
  */
 typedef struct
 {
-    UInt8 id;
-    UInt32 value32;
-    UInt16 value16;
+    UInt8 id;        ///< Some data ID
+    UInt32 value32;  ///< A generic 32bit value
+    UInt16 value16;  ///< A generic 16bit value
 } gpSimpleData_t;
 
 /**
@@ -51,20 +58,11 @@ typedef struct
  */
 typedef struct
 {
-    UInt8 id;
-    UInt32 options;
-    UInt8 length;
-    UInt8 data[MAX_STRUCT_DATA_LENGTH];
+    UInt8 id;                               ///< The data ID
+    UInt32 options;                         ///< A map of bits options
+    UInt8 length;                           ///< The length of the data array
+    UInt8 data[MAX_STRUCT_DATA_LENGTH];     ///< An array of @e length 8 bit values
 } gpTestData_t;
-
-// Old stuff
-#define UINT8_TEST                  0x01
-#define UINT16_TEST                 0x02
-#define UINT32_TEST                 0x04
-#define UINT16_ARRAY_TEST           0x08
-#define STRING_TEST                 0x10
-#define SIMPLESTRUCT_TEST           0x20
-#define COMPLEXSTRUCT_TEST          0x40
 
 
 //Testing functions

@@ -42,6 +42,9 @@
 *.idb
 *.pdb
 
+# Doxygen
+/dox/*
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
