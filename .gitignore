@@ -42,6 +42,10 @@
 *.idb
 *.pdb
 
+# Temporary files
+*.swp
+*.*~
+
 # Doxygen
 /dox/*
 
