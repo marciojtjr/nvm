@@ -1,4 +1,4 @@
-# Non-valatile memory storage component
+# Non-volatile memory storage component
 
 ### This exercise is the implementation of a memory component capable of backing up and restoring values corresponding to a unique attribute identifier.
 ### For simplicity, the underlying memory was modeled as a binary file (mem.bin), which models a memory of 64 kbytes total, 16-bit addressed, 1 byte per address.
@@ -23,5 +23,9 @@
 
 ### The *nvm_tests.c* file has all the unit tests, based on the [UNITY](http://www.throwtheswitch.org/unity/) harness.
 ### The *maic.c* file is unit tests control, which calls all the tests, properly.
+
+----
+
+## The *err_correction-original.c* file shows an algorithm (CRC based) capable of performing a rudimentary recover from corruption. The next step on this development is to adapt this algorithm to the memory access.
 
 
