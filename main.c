@@ -23,5 +23,7 @@ int main()
     RUN_TEST(test_backup_read_array_uint8);
     RUN_TEST(test_backup_read_simple_struct);
     RUN_TEST(test_backup_read_complex_struct);
+    RUN_TEST(test_bit_flip_register);
+    RUN_TEST(test_bit_flip_read_uint32);
     return UNITY_END();
 }

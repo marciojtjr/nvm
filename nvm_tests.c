@@ -304,7 +304,6 @@ void test_backup_read_simple_struct(void)
     testWriteStruct.id = TEST_VALUE_STRUCT_ID;
     testWriteStruct.value16 = TEST_VALUE_INT16;
     testWriteStruct.value32 = TEST_VALUE_INT32;
-    // Generate pseudo random number to initialize the array.
 
     //Write the testing struct with values
     gpNvm_err = gpNvm_SetAttribute(TEST_SIMPLESTRUCT_ID, \
@@ -391,3 +390,88 @@ void test_backup_read_complex_struct(void)
     TEST_ASSERT_EQUAL_UINT((*pTestWriteStruct).data[7], \
                            (*(gpTestData_t *)pReadVal).data[7]);
 } // test_backup_read_complex_struct(
+
+/**
+ * @brief Function to test the CRC identifying a bit flip
+ *
+ * This function tests the ability of the CRC algorithm to identify
+ * the flipping of a bit in the stored data.
+ *
+ */
+void test_bit_flip_register(void)
+{
+    UInt8 testInt8 = TEST_VALUE_INT8;
+    UInt8 *pTestInt8 = &testInt8;
+    alloc_reg_t readReg;
+    UInt8 valueRead, *pValueRead;
+    UInt16 valueAddr, *pValueAdd;
+    UInt8 randBit;
+
+    pValueRead = &valueRead;
+    pValueAdd = &valueAddr;
+    pTestMemory = fopen(".\\mem.bin", "rb+");
+
+    //Write the testing value
+    gpNvm_err = gpNvm_SetAttribute(TEST_8BIT_ID, sizeof(UInt8), \
+                                   (UInt8 *)pTestInt8);
+    TEST_ASSERT_FALSE(gpNvm_err);
+
+    //Now flip a random bit on the register
+    memRead(ID_ADDRESS(TEST_8BIT_ID), ALLOC_REG_LEN, (UInt8 *)&readReg);
+    randBit = rand() % ((8 * ALLOC_REG_LEN)-1);
+    *(UInt32 *)&readReg ^= (UInt32)(1 << randBit);
+    //... and rewrite
+    memWrite(ID_ADDRESS(TEST_8BIT_ID), ALLOC_REG_LEN, (UInt8 *)&readReg);
+    fclose(pTestMemory);
+
+    //Now, try to read it
+    gpNvm_err = gpNvm_GetAttribute(TEST_8BIT_ID, (UInt8 *)pReadLen, \
+                                                 (UInt8 *)pReadVal);
+    //should receive an error
+    TEST_ASSERT_TRUE(gpNvm_err);
+} // test_bit_flip_register(
+
+/**
+ * @brief Function to test the CRC-16 identifying a bit flip
+ *
+ * This function tests the ability of the CRC-16 algorithm to identify
+ * the flipping of a bit in the stored data.
+ *
+ */
+void test_bit_flip_read_uint32(void)
+{
+    UInt32 testInt32 = TEST_VALUE_INT32;
+    UInt32 *pTestInt32 = &testInt32;
+    UInt32 readValue;
+    UInt8 readLen, randBit;
+    UInt16 valueAddr, *pValueAdd;
+
+    pValueAdd = &valueAddr;
+    pReadVal = &readValue;
+    pReadLen = &readLen;
+
+    //Check what should be the address to save the data.
+    pTestMemory = fopen(".\\mem.bin", "rb+");
+    fseek(pTestMemory, NEXT_FREE_ADDR, SEEK_SET);
+    fread(pValueAdd, 1, SIZE_MEM_ADDRESS, pTestMemory);
+    fclose(pTestMemory);
+
+    //Write the testing value
+    gpNvm_err = gpNvm_SetAttribute(TEST_32BIT_ID, \
+                                   sizeof(UInt32), \
+                                   (UInt8 *)pTestInt32);
+    TEST_ASSERT_FALSE(gpNvm_err);
+
+    //Now flip a bit on the value
+    randBit = rand() % ((8 * ALLOC_REG_LEN)-1);
+    testInt32 ^= (UInt32)(1 << randBit);
+    //and manually write it
+    memWrite(valueAddr, sizeof(UInt32)+CRC_LEN, (UInt8 *)pTestInt32);
+
+    //Then try to read it.
+    gpNvm_err = gpNvm_GetAttribute(TEST_32BIT_ID, \
+                                   (UInt8 *)pReadLen, \
+                                   (UInt8 *)pReadVal);
+    //should receive an error
+    TEST_ASSERT_TRUE(gpNvm_err);
+} // test_bit_flip_read_uint32(

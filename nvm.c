@@ -69,7 +69,8 @@ gPNvm_Result gpNvm_GetAttribute(gPNvm_AttrId attrId,
     // To avoid allocating 256 bytes here and putting the read value
     // and CRC appended, and perform a CRC checking with the full data
     // expecting a zero, it will be more efficient to calculate the CRC
-    // over the value and compare with the CRC read. This way we need only 2 bytes
+    // over the value and compare with the CRC read. This way we need
+    // to allocate only 2 bytes
     if (crcRead != calcCRC16(pValue, *pLength))
         return 0xFF;
 

@@ -74,5 +74,7 @@ void test_backup_read_uint32(void);
 void test_backup_read_array_uint8(void);
 void test_backup_read_simple_struct(void);
 void test_backup_read_complex_struct(void);
+void test_bit_flip_register(void);
+void test_bit_flip_read_uint32(void);
 
 #endif
